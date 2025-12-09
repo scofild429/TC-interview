@@ -30,6 +30,7 @@ def input_url():
     url_input = ""
     url_context = ""
     extract_content = ""
+    submit_url = False
     
     col1, col2 = st.columns([8, 2])
     with col1:
@@ -67,14 +68,16 @@ def input_url():
                     st.error(f"❌ An unexpected error occurred: {e}")            
 
     with col2:
-        if st.button("Analysis the URL"):
+        if submit_url := st.button("Analysis the URL"):
             if url_input == "" or st.session_state.select_model is None:
                 show_notificaton_message("please make sure you input valided URL and set the API key already", 2)
             else:
                 extract_content = url_input_analysis(url_context)
                 st.session_state.position_description = extract_content
-    with st.container(height=500):
-        st.markdown(textwrap.dedent(str(st.write(extract_content))))
+                
+    if submit_url:
+        with st.container(height=500):
+            st.markdown(textwrap.dedent(str(st.write(extract_content))))
                 
 
 def resume_input():
