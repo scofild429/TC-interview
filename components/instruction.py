@@ -29,6 +29,8 @@ def input_selected_prompt():
 def input_url():
     url_input = ""
     url_context = ""
+    extract_content = ""
+    
     col1, col2 = st.columns([8, 2])
     with col1:
         url_input = st.text_input(
@@ -71,8 +73,8 @@ def input_url():
             else:
                 extract_content = url_input_analysis(url_context)
                 st.session_state.position_description = extract_content
-                with st.container(height=500):
-                    st.markdown(textwrap.dedent(str(st.write_stream(extract_content))))
+    with st.container(height=500):
+        st.markdown(textwrap.dedent(str(st.write(extract_content))))
                 
 
 def resume_input():
