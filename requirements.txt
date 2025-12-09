@@ -1,0 +1,8 @@
+openai
+langchain
+pandas
+requests
+PyPDF2
+textwarp
+time
+
