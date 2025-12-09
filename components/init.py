@@ -4,7 +4,7 @@ import pandas as pd
 
 def initial_session():
     if "api_key" not in st.session_state:
-        st.session_state.api_key = None
+        st.session_state.api_key = ""
     
     if "config_toggle" not in st.session_state:
         st.session_state.config_toggle = True
