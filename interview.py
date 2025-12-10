@@ -7,7 +7,6 @@ from utiles.llm_model import initial_llm_model
 from openai.types.chat import ChatCompletionMessageParam
 
 
-
 initial_session()
 
 st.set_page_config(
@@ -31,9 +30,6 @@ input_system_instruction()
 input_selected_prompt()
 
 
-# st.write("api")
-# st.markdown(st.session_state.api_key)
-# st.write("key")
 
 for message in st.session_state.messages:
     with st.chat_message(message["role"]):

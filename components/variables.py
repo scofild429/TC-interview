@@ -1,7 +1,8 @@
 import streamlit as st
+import pandas as pd
 
-
-zero_shot_prrompt_content = """
+def init_prompt_content():
+    zero_shot_prompt_content = """
 You are an expert Interview Coach. I will provide you with a job description and  my personal skills.
 
 Your task is to generate a comprehensive interview preparation plan. 
@@ -12,7 +13,7 @@ Your task is to generate a comprehensive interview preparation plan.
 Output everything in clean Markdown.
 """
 
-one_shot_prrompt_content = """
+    one_shot_prompt_content = """
 You are a career strategist. Your goal is to help candidates bridge the gap between their current skills and the job requirements.
 
 Example 1:
@@ -23,7 +24,7 @@ Now, analyze the user's provided Job Description and Skills using this specific 
 """
 
 
-few_shot_prrompt_content = """
+    few_shot_prompt_content = """
 You are a career strategist. Your goal is to help candidates bridge the gap between their current skills and the job requirements.
 
 Example 1:
@@ -37,7 +38,7 @@ Output: **Gap Strategy:** You haven't held a Lead title. Frame your mentorship e
 Now, analyze the user's provided Job Description and Skills using this specific "Gap Strategy" format for any missing requirements.
 """
 
-CoT_prompt_content = """
+    CoT_prompt_content = """
 You are a Hiring Manager preparing to interview a candidate. I will give you the Job Description and the Candidate's Skills.
 
 Please follow this thought process to generate the output:
@@ -49,7 +50,7 @@ Please follow this thought process to generate the output:
 Output only the final Interview Guide in Markdown.
 """
 
-role_playing_prompt_content = """
+    role_playing_prompt_content = """
 You are a "Bar Raiser" interviewer at a top-tier tech company (like Google or Amazon). You are skeptical, detail-oriented, and hate generic answers.
 
 I will give you a Job Description and my Skills. 
@@ -62,13 +63,8 @@ Your goal is to tear apart my profile to find the weak spots.
 Do not be overly polite. Be constructive but critical.
 """
 
-if "position_description" not in st.session_state:
-    st.session_state.position_description = ""
-
-if "resume_description" not in st.session_state:
-    st.session_state.resume_description = ""
     
-delimiter_prompt_content= f"""
+    delimiter_prompt_content= f"""
 You are an expert Technical Interview Coach.
 
 I will provide you with two distinct distinct blocks of text, delimited by XML tags:
@@ -86,3 +82,36 @@ Follow these steps:
 Output Format:
 Please format your response in Markdown, using clear headers for "Gap Analysis", "Defensive Questions", and "Strength Questions".
 """
+    return zero_shot_prompt_content, one_shot_prompt_content, few_shot_prompt_content, CoT_prompt_content, role_playing_prompt_content, delimiter_prompt_content
+
+
+def assemble_prompt_content():
+    
+    zero_shot_prompt_content, one_shot_prompt_content, few_shot_prompt_content, CoT_prompt_content, role_playing_prompt_content, delimiter_prompt_content = init_prompt_content()
+    data = [
+        {
+            "strategy": "zero shot prompt ",
+            "content": zero_shot_prompt_content,
+        },
+        {
+            "strategy": "one shot prompt",
+            "content": one_shot_prompt_content,
+        },
+        {
+            "strategy": "few shot prompt",
+            "content": few_shot_prompt_content,
+        },
+        {
+            "strategy": "Chain of Thoughts",
+            "content": CoT_prompt_content,
+        },
+        {
+            "strategy": "role playing prompt",
+            "content": role_playing_prompt_content,
+        },
+        {
+            "strategy": "delimiter prompt",
+            "content": delimiter_prompt_content,
+        },
+    ]
+    st.session_state.prompt_strategies = pd.DataFrame(data)

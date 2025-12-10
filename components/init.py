@@ -1,7 +1,6 @@
 import streamlit as st
 import pandas as pd
-from .variables import zero_shot_prrompt_content, one_shot_prrompt_content, few_shot_prrompt_content, CoT_prompt_content, role_playing_prompt_content, delimiter_prompt_content
-
+from .variables import init_prompt_content
 
 def initial_session():
     if "api_key" not in st.session_state:
@@ -40,34 +39,6 @@ def initial_session():
     if "messages" not in st.session_state:
         st.session_state.messages = []
 
-    if "prompt_strategies" not in st.session_state:
-        data = [
-            {
-                "strategy": "zero shot prompt ",
-                "content": zero_shot_prrompt_content,
-            },
-            {
-                "strategy": "one shot prompt",
-                "content": one_shot_prrompt_content,
-            },
-            {
-                "strategy": "few shot prompt",
-                "content": few_shot_prrompt_content,
-            },
-            {
-                "strategy": "Chain of Thoughts",
-                "content": CoT_prompt_content,
-            },
-            {
-                "strategy": "role playing prompt",
-                "content": role_playing_prompt_content,
-            },
-            {
-                "strategy": "delimiter prompt",
-                "content": delimiter_prompt_content,
-            },
-        ]
-        st.session_state.prompt_strategies = pd.DataFrame(data)
 
     if "selected_prompt_content" not in st.session_state:
         st.session_state.selected_prompt_content = None
@@ -89,32 +60,39 @@ def initial_session():
     if "toggle_input_pdf" not in st.session_state:
         st.session_state.toggle_input_pdf = False
 
-def init_prompt_content():
-    data = [
-        {
-            "strategy": "zero shot prompt ",
-            "content": zero_shot_prrompt_content,
-        },
-        {
-            "strategy": "one shot prompt",
-            "content": one_shot_prrompt_content,
-        },
-        {
-            "strategy": "few shot prompt",
-            "content": few_shot_prrompt_content,
-        },
-        {
-            "strategy": "Chain of Thoughts",
-            "content": CoT_prompt_content,
-        },
-        {
-            "strategy": "role playing prompt",
-            "content": role_playing_prompt_content,
-        },
-        {
-            "strategy": "delimiter prompt",
-            "content": delimiter_prompt_content,
-        },
-    ]
-    st.session_state.prompt_strategies = pd.DataFrame(data)
+    if "position_description" not in st.session_state:
+        st.session_state.position_description = ""
+
+    if "resume_description" not in st.session_state:
+        st.session_state.resume_description = ""
+        
+    zero_shot_prompt_content, one_shot_prompt_content, few_shot_prompt_content, CoT_prompt_content, role_playing_prompt_content, delimiter_prompt_content = init_prompt_content()        
+    if "prompt_strategies" not in st.session_state:
+        data = [
+            {
+                "strategy": "zero shot prompt ",
+                "content": zero_shot_prompt_content,
+            },
+            {
+                "strategy": "one shot prompt",
+                "content": one_shot_prompt_content,
+            },
+            {
+                "strategy": "few shot prompt",
+                "content": few_shot_prompt_content,
+            },
+            {
+                "strategy": "Chain of Thoughts",
+                "content": CoT_prompt_content,
+            },
+            {
+                "strategy": "role playing prompt",
+                "content": role_playing_prompt_content,
+            },
+            {
+                "strategy": "delimiter prompt",
+                "content": delimiter_prompt_content,
+            },
+        ]
+        st.session_state.prompt_strategies = pd.DataFrame(data)
         

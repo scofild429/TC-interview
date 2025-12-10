@@ -25,12 +25,13 @@ def input_selected_prompt():
 
     
 def input_url():
-    col1, col2 = st.columns([9, 1])
+    col1, col2 = st.columns([8, 2])
     with col1:
         st.text_input(
             "You can provide the position URL",
             key="input_url",
             on_change=action_llm_phase_url,
+            label_visibility="collapsed",
             placeholder="Position URL, start with http"
         )
     with col2:
@@ -45,7 +46,7 @@ def input_url():
             
 
 def resume_input():
-    col1, col2 = st.columns([9, 1])
+    col1, col2 = st.columns([8, 2])
     with col1:
         upload_pdf = st.file_uploader(
             "You can load your resume as PDF",

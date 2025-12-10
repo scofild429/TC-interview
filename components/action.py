@@ -3,11 +3,11 @@ from io import StringIO
 from utiles.llm_model import initial_llm_model
 import requests
 from requests.exceptions import Timeout, ConnectionError, HTTPError, RequestException
-from .init import init_prompt_content
+from .variables import assemble_prompt_content
 
 
 def change_prompt_strategy():
-    init_prompt_content()
+    assemble_prompt_content()
     if st.session_state.selected_prompt_strategy is not None:
         for strategy, content in st.session_state.prompt_strategies[
             ["strategy", "content"]
