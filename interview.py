@@ -1,8 +1,11 @@
 import streamlit as st
-from utiles.notifications import  display_notification
+from utiles.notifications import  display_notification, show_notificaton_message
 from components.init import initial_session
 from components.sidebar import initial_sidebar
-from components.instruction import input_system_instruction, input_url, resume_input, input_selected_prompt
+from components.instruction import input_system_instruction, input_url, resume_input, input_selected_prompt, review_url
+from utiles.llm_model import initial_llm_model
+from openai.types.chat import ChatCompletionMessageParam
+
 
 
 initial_session()
@@ -18,39 +21,46 @@ display_notification()
 
 initial_sidebar()
 
-input_system_instruction()
-input_selected_prompt()
 
 input_url()
+review_url()
 
 resume_input()
 
-
-# st.title("AI helps your intevriew")
-# client = OpenAI(api_key=st.secrets["OPENAI_API_KEY"])
-
-# if "messages" not in st.session_state:
-#     st.session_state.messages = []
-
-# for message in st.session_state.messages:
-#     with st.chat_message(message["role"]):
-#         st.markdown(message["content"])
+input_system_instruction()
+input_selected_prompt()
 
 
-# if prompt := st.chat_input("What's up"):
-#     st.session_state.messages.append({"role": "user", "content": prompt})
-#     with st.chat_message("user"):
-#         st.markdown(prompt)
+# st.write("api")
+# st.markdown(st.session_state.api_key)
+# st.write("key")
 
-#     with st.chat_message("assistant"):
-#         stream = client.chat.completions.create(
-#             model="gpt-4.1-nano",
-#             messages=[
-#                 {"role": m["role"], "content": m["content"]}
-#                 for m in st.session_state.messages
-#             ],
-#             stream=True,
-#         )
+for message in st.session_state.messages:
+    with st.chat_message(message["role"]):
+        st.markdown(message["content"])
 
-#     response = st.write_stream(stream)
-#     st.session_state.messages.append({"role": "assistant", "content": response})
+if prompt := st.chat_input("Input or Enter your start... "):
+    
+    st.session_state.messages.append({"role": "user", "content": prompt})
+    with st.chat_message("user"):
+        st.markdown(prompt)
+
+
+    messages: list[ChatCompletionMessageParam] = [{"role": "system", "content": f"{st.session_state.system_instruction}{st.session_state.selected_prompt_content}"}]
+    for m in st.session_state.messages:
+        messages.append({"role": m["role"], "content": m["content"]})
+    
+    with st.chat_message("assistant"):
+        if client := initial_llm_model():        
+            stream = client.chat.completions.create(
+                model = st.session_state.selected_model,
+                messages = messages,
+                stream=True,
+            )
+            response = st.write_stream(stream)
+            st.session_state.messages.append({"role": "assistant", "content": response})
+        else:
+            show_notificaton_message("Model can't be initialized, please check the API key", 2 )
+
+
+

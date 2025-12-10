@@ -14,7 +14,7 @@ def open_delete_api_dialog():
             st.session_state.update_api_key = False
             st.session_state.api_key = None
             st.session_state.available_model = None
-            st.session_state.select_model = None
+            st.session_state.selected_model = None
             show_notificaton_message("Your API key has been successful removed", 2)
             st.rerun()
     with col2:

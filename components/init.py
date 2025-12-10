@@ -1,5 +1,6 @@
 import streamlit as st
 import pandas as pd
+from .variables import zero_shot_prrompt_content, one_shot_prrompt_content, few_shot_prrompt_content, CoT_prompt_content, role_playing_prompt_content, delimiter_prompt_content
 
 
 def initial_session():
@@ -15,8 +16,8 @@ def initial_session():
     if "available_model" not in st.session_state:
         st.session_state.available_model = None
         
-    if "select_model" not in st.session_state:
-        st.session_state.select_model = None
+    if "selected_model" not in st.session_state:
+        st.session_state.selected_model = None
 
     if "model_temperatur" not in st.session_state:
         st.session_state.model_temperatur = None
@@ -31,30 +32,39 @@ def initial_session():
         st.session_state.model_presence_penalty = None        
 
     if "notification_message_content" not in st.session_state:
-        st.session_state.notification_message_content = None
+        st.session_state.notification_message_content = ""
 
     if "notification_message_time" not in st.session_state:
         st.session_state.notification_message_time = 0
 
-    if "position_description" not in st.session_state:
-        st.session_state.position_description = None
-        
-    if "resume_description" not in st.session_state:
-        st.session_state.resume_description = None
-
     if "messages" not in st.session_state:
         st.session_state.messages = []
-
 
     if "prompt_strategies" not in st.session_state:
         data = [
             {
-                "strategy": "zero-shot",
-                "content": "please help me to solve the problem",
+                "strategy": "zero shot prompt ",
+                "content": zero_shot_prrompt_content,
             },
             {
-                "strategy": "one-shot",
-                "content": "please help me to solve the problem, such as how can I prepare it for my technical skills",
+                "strategy": "one shot prompt",
+                "content": one_shot_prrompt_content,
+            },
+            {
+                "strategy": "few shot prompt",
+                "content": few_shot_prrompt_content,
+            },
+            {
+                "strategy": "Chain of Thoughts",
+                "content": CoT_prompt_content,
+            },
+            {
+                "strategy": "role playing prompt",
+                "content": role_playing_prompt_content,
+            },
+            {
+                "strategy": "delimiter prompt",
+                "content": delimiter_prompt_content,
             },
         ]
         st.session_state.prompt_strategies = pd.DataFrame(data)
@@ -66,3 +76,45 @@ def initial_session():
         st.session_state.selected_prompt_strategy = None
         
 
+    if "review_url_content" not in st.session_state:
+        st.session_state.review_url_content = False
+
+
+    if "review_pdf_content" not in st.session_state:
+        st.session_state.review_pdf_content = False
+
+    if "action_llm_phase_url" not in st.session_state:
+        st.session_state.action_llm_phase_url = False
+
+    if "toggle_input_pdf" not in st.session_state:
+        st.session_state.toggle_input_pdf = False
+
+def init_prompt_content():
+    data = [
+        {
+            "strategy": "zero shot prompt ",
+            "content": zero_shot_prrompt_content,
+        },
+        {
+            "strategy": "one shot prompt",
+            "content": one_shot_prrompt_content,
+        },
+        {
+            "strategy": "few shot prompt",
+            "content": few_shot_prrompt_content,
+        },
+        {
+            "strategy": "Chain of Thoughts",
+            "content": CoT_prompt_content,
+        },
+        {
+            "strategy": "role playing prompt",
+            "content": role_playing_prompt_content,
+        },
+        {
+            "strategy": "delimiter prompt",
+            "content": delimiter_prompt_content,
+        },
+    ]
+    st.session_state.prompt_strategies = pd.DataFrame(data)
+        

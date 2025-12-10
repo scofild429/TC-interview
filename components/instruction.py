@@ -1,11 +1,7 @@
 import streamlit as st
-import requests
-import textwrap
 import PyPDF2
-from requests.exceptions import Timeout, ConnectionError, HTTPError, RequestException
-from utiles.llm_model import url_input_analysis
 from utiles.notifications import show_notificaton_message
-from openai import OpenAI
+from .action import toggel_review_pdf_content, toggle_review_url_content, action_llm_phase_url, llm_phase_url, phase_pdf
 
 
 def input_system_instruction():
@@ -18,83 +14,51 @@ def input_system_instruction():
         help="Type your text and click away (or Ctrl+Enter) to save."
     )
 
+    
 def input_selected_prompt():
     st.text_area(
         "You selected prompt",
-        height=100,
+        height=300,
         key="selected_prompt_content",
         help="Type your text and click away (or Ctrl+Enter) to save."
     )    
 
-def input_url():
-    url_input = ""
-    url_context = ""
-    extract_content = ""
-    submit_url = False
     
-    col1, col2 = st.columns([8, 2])
+def input_url():
+    col1, col2 = st.columns([9, 1])
     with col1:
-        url_input = st.text_input(
+        st.text_input(
             "You can provide the position URL",
-            label_visibility="collapsed",
+            key="input_url",
+            on_change=action_llm_phase_url,
             placeholder="Position URL, start with http"
         )
-        if url_input:
-            if not url_input.startswith("http"):
-                st.error("Your URL should starts with 'http' or 'https'")
-            else:
-                try:
-                    with st.spinner(f"Querying {url_input}"):
-                        #time out check
-                        response = requests.get(url_input, timeout=5)
-                        response.raise_for_status()
-                        url_context = response.text
-
-                except HTTPError as http_err:
-                    # Handles 4xx (Client Error) and 5xx (Server Error)
-                    st.error(f"❌ HTTP Error: The server returned code{http_err.response.status_code}")
-                    st.code(str(http_err), language="bash")
-
-                except ConnectionError:
-                    # Handles DNS failures or refused connections
-                    st.error("❌ Connection Error: Could not reach the server.")
-
-                except Timeout:
-                    # Handles cases where the server is too slow
-                    st.error("❌ Timeout: The server took too long to respond (>5 seconds).")
-
-                except RequestException as e:
-                    # Catch-all for any other weird requests-related errors
-                    st.error(f"❌ An unexpected error occurred: {e}")            
-
     with col2:
-        if submit_url := st.button("Analysis the URL"):
-            if url_input == "" or st.session_state.select_model is None:
-                show_notificaton_message("please make sure you input valided URL and set the API key already", 2)
-            else:
-                extract_content = url_input_analysis(url_context)
-                st.session_state.position_description = extract_content
-                
-    if submit_url:
+        st.button("View URL Content", on_click = toggle_review_url_content)
+
+    if st.session_state.review_url_content:
         with st.container(height=500):
-            st.markdown(textwrap.dedent(str(st.write(extract_content))))
-                
+            if st.session_state.position_description:
+                st.markdown(st.session_state.position_description)
+            else:
+                st.write("Analysis this URL at first.")
+            
 
 def resume_input():
-    pdf_reader = None
-    
-    col1, col2 = st.columns([8, 2])
+    col1, col2 = st.columns([9, 1])
     with col1:
         upload_pdf = st.file_uploader(
             "You can load your resume as PDF",
             label_visibility="collapsed",
+            on_change = phase_pdf,
             type="pdf"
         )
-        if upload_pdf is not None:
-            pdf_reader = PyPDF2.PdfReader(upload_pdf)        
-    with col2:
-        if st.button("Phasing this PDF resume"):
-            if pdf_reader is not None:
+        
+        #        print(st.session_state.toggle_input_pdf)
+        if st.session_state.toggle_input_pdf:
+            st.session_state.toggle_input_pdf = False
+            if upload_pdf is not None:
+                pdf_reader = PyPDF2.PdfReader(upload_pdf)
                 pdf_content = ""
                 for page in pdf_reader.pages:
                     pdf_content += page.extract_text() + "\n"
@@ -102,35 +66,20 @@ def resume_input():
                 show_notificaton_message("PDF is successful phased.", 2)
             else:
                 show_notificaton_message("You PDF has no contxt", 2)
-
-    
-                
-def input_zero_shut_prompt():
-    st.divider()
-
-    col1, col2 = st.columns([8, 2])
-    prompt = ""
-    with col1:
-        zero_shut_prompt = st.text_area(
-            "Zero shut Prompt",
-            height=120,
-            value = "I want you give me some advance.",
-            help="change your input prompt as you like."
-        )
-        prompt =  f"Given the materials: ```{st.session_state.position_description }, { st.session_state.resume_description }```, {zero_shut_prompt}"
     with col2:
-        if st.button("Try zero shut prompt"):
-            if st.session_state.select_model is None:
-                show_notificaton_message("please make sure you input valided URL and set the API key already", 2)
+        st.button("View PDF Content", on_click=toggel_review_pdf_content)
+
+    if st.session_state.review_pdf_content:
+        with st.container(height=500):
+            if st.session_state.resume_description:
+                st.write(st.session_state.resume_description)
             else:
-                client = OpenAI(api_key = st.session_state.api_key)
-                response = client.chat.completions.create(
-                    model = st.session_state.select_model,
-                    messages = [
-                        {"role": "system", "content": st.session_state.system_instruction },
-                        {"role": "user", "content": prompt}
-                    ]
-                )
-                
-    
- 
+                st.write("Phasing the PDF at first.")
+
+
+def review_url():
+    if st.session_state.action_llm_phase_url:
+        st.session_state.action_llm_phase_url = False
+        llm_phase_url()
+
+        
