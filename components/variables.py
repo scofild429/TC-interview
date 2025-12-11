@@ -3,20 +3,22 @@ import pandas as pd
 
 
 def init_prompt_content():
-    standard_prompt_content = """
-    You are a expert interview supporter, please help me to prepare my interview.
+    standard_prompt_content = f"""
+    You are a expert interview supporter, please help me to prepare my interview. position description is {st.session_state.position_description} and resume description is{st.session_state.resume_description}
 """
 
-    zero_shot_prompt_content = """
-    You are a expert interview supporter, please help me to prepare my interview.
+    zero_shot_prompt_content = f"""
+    You are a expert interview supporter, please help me to prepare my interview. position description is {st.session_state.position_description} and resume description is{st.session_state.resume_description}
+    
 Please based on my information help me to generate a comprehensive interview preparation plan.
 1. Analyze how well my skills match the job requirements.
 2. tell me the toptics which I should concern and prepare.
 3. Generate a few most likely technical questions and provide answer behind.
 """
 
-    one_shot_prompt_content = """
-    You are a expert interview supporter, please help me to prepare my interview.
+    one_shot_prompt_content = f"""
+    You are a expert interview supporter, please help me to prepare my interview. position description is {st.session_state.position_description} and resume description is{st.session_state.resume_description}
+    
 Please based on my information help me to generate a comprehensive interview preparation plan.
 1. Analyze how well my skills match the job requirements.
 2. tell me the toptics which I should concern and prepare.
@@ -27,8 +29,9 @@ Job description requires Python experience and user resume has a few Python proj
 Output: Your Python experience aligns well with the job requirements, especially since your resume includes several relevant Python projects. You should focus on preparing core Python concepts, data structures, and common libraries used in the role. Expect technical questions about your past Python projects, debugging scenarios, and how you structure clean, maintainable code. A likely question is: “Explain how you would optimize a slow Python script?”
 """
 
-    few_shot_prompt_content = """
-    You are a expert interview supporter, please help me to prepare my interview.
+    few_shot_prompt_content = f"""
+    You are a expert interview supporter, please help me to prepare my interview. position description is {st.session_state.position_description} and resume description is{st.session_state.resume_description}
+    
     Please based on my information help me to generate a comprehensive interview preparation plan.
 1. Analyze how well my skills match the job requirements.
 2. tell me the toptics which I should concern and prepare.
@@ -45,8 +48,9 @@ Output:
     Your background in Linux and DevOps aligns well with the cloud-focused requirements, especially if you’ve worked with automation or deployment workflows. You should prepare topics like AWS core services (EC2, S3, IAM), CI/CD pipelines, containerization, and monitoring. Expect questions about designing scalable cloud architectures and troubleshooting production issues. A likely question is: “How would you design a highly available deployment pipeline?”.
 """
 
-    CoT_prompt_content = """
-    You are a expert interview supporter, please help me to prepare my interview.
+    CoT_prompt_content = f"""
+    You are a expert interview supporter, please help me to prepare my interview. position description is {st.session_state.position_description} and resume description is{st.session_state.resume_description}
+    
 Please based on my information help me to generate a comprehensive interview preparation plan.
     Think: Make sure that you understand and jos description and user resume
 1. Analyze how well my skills match the job requirements.
