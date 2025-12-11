@@ -1,29 +1,35 @@
 import streamlit as st
 import PyPDF2
 from utiles.notifications import show_notificaton_message
-from .action import toggel_review_pdf_content, toggle_review_url_content, action_llm_phase_url, llm_phase_url, phase_pdf
+from .action import (
+    toggel_review_pdf_content,
+    toggle_review_url_content,
+    action_llm_phase_url,
+    llm_phase_url,
+    phase_pdf,
+)
 
 
 def input_system_instruction():
-    st.header("You are prepare now a interview!")
+    st.header("You are preparing now an interview!")
     st.text_area(
         "System instruction with selected prompt",
         height=120,
         key="system_instruction",
-        value = "You are a great assistant, I want you help me to prepare an interview.",
-        help="Type your text and click away (or Ctrl+Enter) to save."
+        value="You are a great assistant, I want you help me to prepare an interview.",
+        help="Type your text and click away (or Ctrl+Enter) to save.",
     )
 
-    
+
 def input_selected_prompt():
     st.text_area(
         "You selected prompt",
         height=300,
         key="selected_prompt_content",
-        help="Type your text and click away (or Ctrl+Enter) to save."
-    )    
+        help="Type your text and click away (or Ctrl+Enter) to save.",
+    )
 
-    
+
 def input_url():
     col1, col2 = st.columns([8, 2])
     with col1:
@@ -32,10 +38,10 @@ def input_url():
             key="input_url",
             on_change=action_llm_phase_url,
             label_visibility="collapsed",
-            placeholder="Position URL, start with http"
+            placeholder="Position URL, start with http",
         )
     with col2:
-        st.button("View URL Content", on_click = toggle_review_url_content)
+        st.button("View URL Content", on_click=toggle_review_url_content)
 
     if st.session_state.review_url_content:
         with st.container(height=500):
@@ -43,7 +49,7 @@ def input_url():
                 st.markdown(st.session_state.position_description)
             else:
                 st.write("Analysis this URL at first.")
-            
+
 
 def resume_input():
     col1, col2 = st.columns([8, 2])
@@ -51,10 +57,10 @@ def resume_input():
         upload_pdf = st.file_uploader(
             "You can load your resume as PDF",
             label_visibility="collapsed",
-            on_change = phase_pdf,
-            type="pdf"
+            on_change=phase_pdf,
+            type="pdf",
         )
-        
+
         #        print(st.session_state.toggle_input_pdf)
         if st.session_state.toggle_input_pdf:
             st.session_state.toggle_input_pdf = False
@@ -82,5 +88,3 @@ def review_url():
     if st.session_state.action_llm_phase_url:
         st.session_state.action_llm_phase_url = False
         llm_phase_url()
-
-        

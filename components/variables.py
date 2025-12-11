@@ -1,94 +1,107 @@
 import streamlit as st
 import pandas as pd
 
+
 def init_prompt_content():
+    standard_prompt_content = """
+    You are a expert interview supporter, please help me to prepare my interview.
+"""
+
     zero_shot_prompt_content = """
-You are an expert Interview Coach. I will provide you with a job description and  my personal skills.
-
-Your task is to generate a comprehensive interview preparation plan. 
+    You are a expert interview supporter, please help me to prepare my interview.
+Please based on my information help me to generate a comprehensive interview preparation plan.
 1. Analyze how well my skills match the job requirements.
-2. Generate 5 likely technical questions based on the JD and provide answer behind.
-3. Provide short, bullet-point advice on how to answer each based on my specific skills.
-
-Output everything in clean Markdown.
+2. tell me the toptics which I should concern and prepare.
+3. Generate a few most likely technical questions and provide answer behind.
 """
 
     one_shot_prompt_content = """
-You are a career strategist. Your goal is to help candidates bridge the gap between their current skills and the job requirements.
+    You are a expert interview supporter, please help me to prepare my interview.
+Please based on my information help me to generate a comprehensive interview preparation plan.
+1. Analyze how well my skills match the job requirements.
+2. tell me the toptics which I should concern and prepare.
+3. Generate a few most likely technical questions and provide answer behind.    
 
-Example 1:
-Input: JD requires "Expert Python"; User has "Intermediate Java".
-Output: **Gap Strategy:** You lack Python experience. Pivot by explaining your strong OOP grasp in Java and how easily those concepts translate to Python. Mention you are willing to upskill quickly.
-
-Now, analyze the user's provided Job Description and Skills using this specific "Gap Strategy" format for any missing requirements.
+Example:
+Job description requires Python experience and user resume has a few Python project listed.
+Output: Your Python experience aligns well with the job requirements, especially since your resume includes several relevant Python projects. You should focus on preparing core Python concepts, data structures, and common libraries used in the role. Expect technical questions about your past Python projects, debugging scenarios, and how you structure clean, maintainable code. A likely question is: “Explain how you would optimize a slow Python script?”
 """
 
-
     few_shot_prompt_content = """
-You are a career strategist. Your goal is to help candidates bridge the gap between their current skills and the job requirements.
+    You are a expert interview supporter, please help me to prepare my interview.
+    Please based on my information help me to generate a comprehensive interview preparation plan.
+1. Analyze how well my skills match the job requirements.
+2. tell me the toptics which I should concern and prepare.
+3. Generate a few most likely technical questions and provide answer behind.    
 
 Example 1:
-Input: JD requires "Expert Python"; User has "Intermediate Java".
-Output: **Gap Strategy:** You lack Python experience. Pivot by explaining your strong OOP grasp in Java and how easily those concepts translate to Python. Mention you are willing to upskill quickly.
+    Job description requires Python experience and user resume has a few Python project listed.
+Output:
+    Your Python experience aligns well with the job requirements, especially since your resume includes several relevant Python projects. You should focus on preparing core Python concepts, data structures, and common libraries used in the role. Expect technical questions about your past Python projects, debugging scenarios, and how you structure clean, maintainable code. A likely question is: “Explain how you would optimize a slow Python script?”
 
 Example 2:
-Input: JD requires "Team Leadership"; User has "Mentored a junior dev".
-Output: **Gap Strategy:** You haven't held a Lead title. Frame your mentorship experience as "informal leadership" using the STAR method to show impact.
-
-Now, analyze the user's provided Job Description and Skills using this specific "Gap Strategy" format for any missing requirements.
+    Job description requires cloud infrastructure knowledge (AWS, CI/CD) and the user has DevOps and Linux experience.
+Output:  
+    Your background in Linux and DevOps aligns well with the cloud-focused requirements, especially if you’ve worked with automation or deployment workflows. You should prepare topics like AWS core services (EC2, S3, IAM), CI/CD pipelines, containerization, and monitoring. Expect questions about designing scalable cloud architectures and troubleshooting production issues. A likely question is: “How would you design a highly available deployment pipeline?”.
 """
 
     CoT_prompt_content = """
-You are a Hiring Manager preparing to interview a candidate. I will give you the Job Description and the Candidate's Skills.
+    You are a expert interview supporter, please help me to prepare my interview.
+Please based on my information help me to generate a comprehensive interview preparation plan.
+    Think: Make sure that you understand and jos description and user resume
+1. Analyze how well my skills match the job requirements.
+    Think: how to find the maximum common part and how to cover the gap
+2. tell me the toptics which I should concern and prepare.
+    Think: how to emphasize my strength
+3. Generate a few most likely technical questions and provide answer behind.
+    Think step by step how to provide a great answer
 
-Please follow this thought process to generate the output:
-1. First, identify the "Must-Have" technical keywords in the Job Description.
-2. Second, compare those keywords against the Candidate's Skills to find matches and misses.
-3. Third, infer the company culture (e.g., is it a startup requiring speed, or a corporation requiring stability?).
-4. Finally, construct a list of 5 high-priority interview questions that probe the candidate's specific weak points (the misses) and validate their strong points.
-
-Output only the final Interview Guide in Markdown.
+Example:
+Job description requires Python experience and user resume has a few Python project listed.
+Output: Your Python experience aligns well with the job requirements, especially since your resume includes several relevant Python projects. You should focus on preparing core Python concepts, data structures, and common libraries used in the role. Expect technical questions about your past Python projects, debugging scenarios, and how you structure clean, maintainable code. A likely question is: “Explain how you would optimize a slow Python script?”
+    Think: if this question is related to the job description, and how to performance well to emphasise I am a perfect candidate.
 """
 
-    role_playing_prompt_content = """
-You are a "Bar Raiser" interviewer at a top-tier tech company (like Google or Amazon). You are skeptical, detail-oriented, and hate generic answers.
+    delimiter_prompt_content = f"""
+    You are a expert interview supporter, please help me to prepare my interview.
+Please based on my information help me to generate a comprehensive interview preparation plan. The job description and resume descripton are  delimited by XML tags:
+1. <position_description> {st.session_state.position_description}</position_description>
+2. <resume_description>{st.session_state.resume_description}</resume_description>
 
-I will give you a Job Description and my Skills. 
-Your goal is to tear apart my profile to find the weak spots. 
+1. Analyze how well my skills match the job requirements.
+2. tell me the toptics which I should concern and prepare.
+3. Generate a few most likely technical questions and provide answer behind.    
 
-1. Tell me exactly why I might NOT get this job based on the skills provided.
-2. Create 3 extremely difficult technical scenario questions that test the limits of the skills I *do* have.
-3. Demand that I use the STAR method (Situation, Task, Action, Result) for my answers.
+Example:
+Job description requires Python experience and user resume has a few Python project listed.
+Output: Your Python experience aligns well with the job requirements, especially since your resume includes several relevant Python projects. You should focus on preparing core Python concepts, data structures, and common libraries used in the role. Expect technical questions about your past Python projects, debugging scenarios, and how you structure clean, maintainable code. A likely question is: “Explain how you would optimize a slow Python script?”
 
-Do not be overly polite. Be constructive but critical.
 """
-
-    
-    delimiter_prompt_content= f"""
-You are an expert Technical Interview Coach.
-
-I will provide you with two distinct distinct blocks of text, delimited by XML tags:
-1. <{st.session_state.position_description}>: The full text of the job posting.
-2. <{st.session_state.resume_description}>: The candidate's resume with list of skills.
-
-Your task is to synthesize these two sources to create a tailored preparation guide.
-
-Follow these steps:
-1. Extract key requirements from the <job_description> that match the <candidate_skills>.
-2. Identify "Critical Gaps": Requirements in the JD that are NOT present in the <candidate_skills>.
-3. Generate 3 specific interview questions that target these "Critical Gaps" to help the candidate prepare defenses.
-4. Generate 3 "Strength Questions" that allow the candidate to show off their matching skills.
-
-Output Format:
-Please format your response in Markdown, using clear headers for "Gap Analysis", "Defensive Questions", and "Strength Questions".
-"""
-    return zero_shot_prompt_content, one_shot_prompt_content, few_shot_prompt_content, CoT_prompt_content, role_playing_prompt_content, delimiter_prompt_content
+    return (
+        standard_prompt_content,
+        zero_shot_prompt_content,
+        one_shot_prompt_content,
+        few_shot_prompt_content,
+        CoT_prompt_content,
+        delimiter_prompt_content,
+    )
 
 
 def assemble_prompt_content():
-    
-    zero_shot_prompt_content, one_shot_prompt_content, few_shot_prompt_content, CoT_prompt_content, role_playing_prompt_content, delimiter_prompt_content = init_prompt_content()
+    (
+        standard_prompt_content,
+        zero_shot_prompt_content,
+        one_shot_prompt_content,
+        few_shot_prompt_content,
+        CoT_prompt_content,
+        delimiter_prompt_content,
+    ) = init_prompt_content()
+
     data = [
+        {
+            "strategy": "standard prompt ",
+            "content": standard_prompt_content,
+        },
         {
             "strategy": "zero shot prompt ",
             "content": zero_shot_prompt_content,
@@ -102,12 +115,8 @@ def assemble_prompt_content():
             "content": few_shot_prompt_content,
         },
         {
-            "strategy": "Chain of Thoughts",
+            "strategy": "Chain of Thought",
             "content": CoT_prompt_content,
-        },
-        {
-            "strategy": "role playing prompt",
-            "content": role_playing_prompt_content,
         },
         {
             "strategy": "delimiter prompt",

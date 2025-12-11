@@ -15,15 +15,24 @@ def change_prompt_strategy():
             if st.session_state.selected_prompt_strategy == strategy:
                 st.session_state.selected_prompt_content = content
 
-    
+        for strategy, messages in st.session_state.prompt_strategies_messages[
+            ["strategy", "messages"]
+        ].values:
+            if st.session_state.selected_prompt_strategy == strategy:
+                st.session_state.messages = messages
+
+
 def toggle_review_url_content():
     st.session_state.review_url_content = not st.session_state.review_url_content
-    
+
+
 def toggel_review_pdf_content():
     st.session_state.review_pdf_content = not st.session_state.review_pdf_content
 
+
 def action_llm_phase_url():
     st.session_state.action_llm_phase_url = True
+
 
 def llm_phase_url():
     url_input = st.session_state.input_url
@@ -41,12 +50,15 @@ def llm_phase_url():
                         return None
 
                     response = client.chat.completions.create(
-                        model = st.session_state.selected_model,
-                        messages = [
-                            {"role": "system", "content": "You are a very helpful assistant, please extract the complete position informatoin, without any imgaes included, and then convert it into markdown format, please be careful and think hard, you have to return valid markdown format."},
-                            {"role": "user", "content": response.text}
+                        model=st.session_state.selected_model,
+                        messages=[
+                            {
+                                "role": "system",
+                                "content": "You are a very helpful assistant, please extract the complete position informatoin, without any imgaes included, and then convert it into markdown format, please be careful and think hard, you have to return valid markdown format.",
+                            },
+                            {"role": "user", "content": response.text},
                         ],
-                        stream = True
+                        stream=True,
                     )
                     full_text_capture = StringIO()
                     display_chunks = []
@@ -59,13 +71,14 @@ def llm_phase_url():
                     with st.container(height=500):
                         st.write_stream(display_chunks)
 
-                    final_content_string = full_text_capture.getvalue()                
+                    final_content_string = full_text_capture.getvalue()
                     st.session_state.position_description = final_content_string
-
 
             except HTTPError as http_err:
                 # Handles 4xx (Client Error) and 5xx (Server Error)
-                st.error(f"❌ HTTP Error: The server returned code{http_err.response.status_code}")
+                st.error(
+                    f"❌ HTTP Error: The server returned code{http_err.response.status_code}"
+                )
                 st.code(str(http_err), language="bash")
 
             except ConnectionError:
@@ -74,12 +87,14 @@ def llm_phase_url():
 
             except Timeout:
                 # Handles cases where the server is too slow
-                st.error("❌ Timeout: The server took too long to respond (>5 seconds).")
+                st.error(
+                    "❌ Timeout: The server took too long to respond (>5 seconds)."
+                )
 
             except RequestException as e:
                 # Catch-all for any other weird requests-related errors
-                st.error(f"❌ An unexpected error occurred: {e}")            
+                st.error(f"❌ An unexpected error occurred: {e}")
 
 
 def phase_pdf():
-    st.session_state.toggle_input_pdf =  True
+    st.session_state.toggle_input_pdf = True

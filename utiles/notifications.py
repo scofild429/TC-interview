@@ -12,7 +12,6 @@ def get_msg_placeholder():
     return st.session_state.msg_placeholder
 
 
-
 def display_notification():
     """
     Check if there's a notification to display and show it.
@@ -20,14 +19,14 @@ def display_notification():
     """
 
     get_msg_placeholder()
-    
+
     if st.session_state.notification_message_content:
         msg_placeholder = get_msg_placeholder()
         msg_placeholder.success(st.session_state.notification_message_content)
-        
+
         # Sleep to show the notification
         time.sleep(st.session_state.notification_message_time)
-        
+
         # Clear the notification
         msg_placeholder.empty()
         st.session_state.notification_message_content = None
@@ -37,7 +36,7 @@ def display_notification():
 def show_notificaton_message(message, duration):
     """
     Set a notification message to be displayed at the top of the app.
-    
+
     Args:
         message: The message to display
         duration: How long to display the message (in seconds)
@@ -45,18 +44,18 @@ def show_notificaton_message(message, duration):
     st.session_state.notification_message_content = message
     st.session_state.notification_message_time = duration
     st.rerun()
-        
-        
+
+
 def show_message_callback(message, duration):
     """
     Display a success message immediately at the top of the app.
-    
+
     Args:
         message: The success message to display
         duration: How long to display the message (in seconds)
     """
     msg_placeholder = get_msg_placeholder()
-    
+
     msg_placeholder.success(message)
     # This pauses execution so the user can see the popup
     time.sleep(duration)
