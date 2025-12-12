@@ -1,16 +1,32 @@
+"""
+Dialog components for configuration management.
+
+This module provides dialog windows for:
+- API key deletion confirmation
+- Model hyperparameter adjustment
+"""
+
 import streamlit as st
-from .hyper_para import (
+from config.hyper_para import (
     set_frequency_penalty,
     set_presence_penalty,
     set_tempertur,
     set_top_k,
     set_top_p,
 )
-from utiles.notifications import show_notificaton_message
+from utiles.show_notifications import show_notificaton_message
 
 
 @st.dialog("Delete API Key")
 def open_delete_api_dialog():
+    """
+    Display a confirmation dialog for deleting the stored API key.
+
+    Presents a warning message with Yes/Cancel options. If confirmed:
+    - Resets API key and model configuration
+    - Shows the API configuration sidebar
+    - Displays a success notification
+    """
     st.write("Are you sure you delete your API key? This cannot be undone.")
 
     col1, _, col2 = st.columns([1, 3, 1])
@@ -31,6 +47,16 @@ def open_delete_api_dialog():
 
 @st.dialog("Adjust the model")
 def open_model_config_dialog():
+    """
+    Display a dialog for adjusting model inference parameters.
+
+    Provides sliders for configuring:
+    - Temperature: Controls randomness of responses
+    - Top-k: Number of token candidates to consider
+    - Top-p: Nucleus sampling threshold
+    - Frequency penalty: Reduces repetition of tokens
+    - Presence penalty: Reduces repetition of topics
+    """
     set_tempertur()
     set_top_k()
     set_top_p()

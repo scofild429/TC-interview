@@ -1,9 +1,30 @@
+"""
+Session state initialization for the interview preparation application.
+
+This module initializes all session state variables with default values
+at application startup. Session state persists data across Streamlit reruns.
+"""
+
 import streamlit as st
 import pandas as pd
 from .variables import init_prompt_content
 
 
 def initial_session():
+    """
+    Initialize all session state variables with default values.
+
+    This function sets up:
+    - API configuration (key, available models, selected model)
+    - Model hyperparameters (temperature, top_p, top_k, penalties)
+    - UI state (toggles, notifications)
+    - Chat state (messages, conversation history)
+    - Prompt strategies (predefined prompt templates and their message histories)
+    - Content storage (position description, resume text)
+
+    Only initializes variables that don't already exist in session state,
+    preserving existing values across reruns.
+    """
     if "api_key" not in st.session_state:
         st.session_state.api_key = None
 
@@ -132,3 +153,13 @@ def initial_session():
             },
         ]
         st.session_state.prompt_strategies_messages = pd.DataFrame(data)
+
+
+def init_msg_placeholder():
+    """
+    Get or create the message placeholder that persists across reruns.
+    The placeholder must be created at the top of the app to always be visible.
+    """
+    if "msg_placeholder" not in st.session_state:
+        st.session_state.msg_placeholder = st.empty()
+    return st.session_state.msg_placeholder

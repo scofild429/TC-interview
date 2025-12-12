@@ -1,12 +1,31 @@
+"""
+Action handlers for user interactions in the interview preparation application.
+
+This module contains callback functions that handle various user actions such as:
+- Changing prompt strategies
+- Toggling content review panels
+- Processing URLs to extract job descriptions
+- Handling PDF resume uploads
+"""
+
 import streamlit as st
 from io import StringIO
-from utiles.llm_model import initial_llm_model
+
+from .init_llm_model import initial_llm_model
 import requests
 from requests.exceptions import Timeout, ConnectionError, HTTPError, RequestException
-from .variables import assemble_prompt_content
+from config.variables import assemble_prompt_content
 
 
 def change_prompt_strategy():
+    """
+    Handle prompt strategy selection change.
+
+    Updates the selected prompt content based on the chosen strategy and
+    restores the conversation history associated with that strategy.
+    This allows users to switch between different prompt engineering approaches
+    while maintaining separate conversation contexts.
+    """
     assemble_prompt_content()
     if st.session_state.selected_prompt_strategy is not None:
         for strategy, content in st.session_state.prompt_strategies[
@@ -23,18 +42,50 @@ def change_prompt_strategy():
 
 
 def toggle_review_url_content():
+    """
+    Toggle the visibility of the URL content review panel.
+
+    Switches the state to show/hide the extracted job description from the URL.
+    """
     st.session_state.review_url_content = not st.session_state.review_url_content
 
 
 def toggel_review_pdf_content():
+    """
+    Toggle the visibility of the PDF content review panel.
+
+    Switches the state to show/hide the extracted resume text from the uploaded PDF.
+    """
     st.session_state.review_pdf_content = not st.session_state.review_pdf_content
 
 
-def action_llm_phase_url():
+def toggle_llm_phase_url():
+    """
+    Set flag to trigger LLM processing of the input URL.
+
+    This callback is triggered when the URL input field changes,
+    signaling that the URL should be processed by the LLM.
+    """
+    if st.session_state.api_key is None or st.session_state.selected_model is None:
+        st.error("Please inupt API and set model at first.")
+        return
+
     st.session_state.action_llm_phase_url = True
 
 
 def llm_phase_url():
+    """
+    Process a job posting URL using LLM to extract and format position information.
+
+    This function:
+    1. Validates the URL format
+    2. Fetches the web page content
+    3. Uses OpenAI API to extract position information
+    4. Converts the extracted content to markdown format
+    5. Displays the result and stores it in session state
+
+    Handles various errors including HTTP errors, connection issues, and timeouts.
+    """
     url_input = st.session_state.input_url
     if url_input:
         if not url_input.startswith("http"):
@@ -97,4 +148,10 @@ def llm_phase_url():
 
 
 def phase_pdf():
+    """
+    Set flag to trigger PDF processing.
+
+    This callback is triggered when a PDF file is uploaded,
+    signaling that the PDF content should be extracted.
+    """
     st.session_state.toggle_input_pdf = True

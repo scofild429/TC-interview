@@ -1,8 +1,39 @@
+"""
+Prompt strategy templates and content management.
+
+This module defines various prompt engineering strategies and their content:
+- Standard prompt: Basic instruction without examples
+- Zero-shot prompt: Instruction with specific task breakdown
+- One-shot prompt: Instruction with one example
+- Few-shot prompt: Instruction with multiple examples
+- Chain of Thought (CoT): Instruction with step-by-step reasoning
+- Delimiter prompt: Instruction with XML-delimited inputs
+"""
+
 import streamlit as st
 import pandas as pd
 
 
 def init_prompt_content():
+    """
+    Initialize all prompt strategy templates with current session data.
+    
+    Each prompt template dynamically incorporates:
+    - st.session_state.position_description: Job posting details
+    - st.session_state.resume_description: User's resume text
+    
+    Returns:
+        tuple: Six prompt templates (standard, zero-shot, one-shot, 
+               few-shot, CoT, delimiter) ready for use
+    
+    Prompt strategies explained:
+    - Standard: Simple instruction without guidance
+    - Zero-shot: Detailed task breakdown without examples
+    - One-shot: One example to demonstrate expected output
+    - Few-shot: Multiple examples for better generalization
+    - Chain of Thought: Step-by-step reasoning prompts
+    - Delimiter: XML tags to clearly separate different inputs
+    """
     standard_prompt_content = f"""
     You are a expert interview supporter, please help me to prepare my interview. position description is {st.session_state.position_description} and resume description is{st.session_state.resume_description}
 """
@@ -92,6 +123,14 @@ Output: Your Python experience aligns well with the job requirements, especially
 
 
 def assemble_prompt_content():
+    """
+    Refresh prompt strategy content with current session data.
+    
+    This function regenerates all prompt templates using the latest
+    position and resume descriptions, then updates the prompt_strategies
+    DataFrame in session state. Should be called whenever position or
+    resume content changes to ensure prompts reflect current data.
+    """
     (
         standard_prompt_content,
         zero_shot_prompt_content,

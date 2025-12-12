@@ -1,2 +1,458 @@
-Deployed as Streamlit app at https://tc-interview-silin.streamlit.app/
+#+TITLE: Interview Preparation Assistant
+#+AUTHOR: Si Zhao
+#+DATE: 2025
 
+* Overview
+
+The Interview Preparation Assistant is an AI-powered Streamlit application designed to help users prepare for job interviews effectively. By analyzing job descriptions and resume content, it generates personalized interview preparation plans, potential questions, and tailored advice using various prompt engineering strategies.
+
+*Live Demo:* https://tc-interview-silin.streamlit.app/
+
+** Key Features
+
+- 🔐 *Secure API Key Management*: Safe storage and validation of OpenAI credentials
+- ⚙️ *Configurable AI Models*: Adjust temperature, top-p, penalties, and more
+- 🔍 *Job Description Analysis*: Extract and parse job postings from URLs using AI
+- 📄 *Resume Processing*: Upload and extract text from PDF resumes
+- 🎯 *Multiple Prompt Strategies*: Six different prompt engineering approaches
+- 💬 *Interactive Chat Interface*: Conversational AI assistant for interview preparation
+
+* Architecture
+** Project Structure
+
+#+BEGIN_SRC
+interview/sizhao-AE.1.4/
+├── interview.py                   # Main application entry point
+├── requirements.txt           # Python dependencies
+├── ruff.toml                        # Code linter configuration
+├── config/                           # Configuration and initialization
+│   ├── init.py                              # Session state initialization
+│   ├── hyper_para.py                # Model hyperparameter controls
+│   └── variables.py                   # Prompt strategy templates
+├── components/                # UI components
+│   ├── content.py                     # Content input components
+│   ├── dialogs.py                      # Configuration dialog windows
+│   └── sidebar.py                     # Sidebar interface
+└── utiles/                           # Utility modules
+    ├── actions.py                       # User interaction callbacks
+    ├── check_api.py                   # API key validation
+    ├── init_llm_model.py            # OpenAI client management
+    └── show_notifications.py     # User feedback system
+#+END_SRC
+
+** Technology Stack
+
+- *Framework*: Streamlit (Python web application)
+- *AI/LLM*: OpenAI API (GPT models)
+- *PDF Processing*: PyPDF2
+- *HTTP Requests*: requests library
+- *Data Management*: pandas (for prompt strategies content management and switching)
+
+* Core Components
+
+** 1. Main Application (interview.py)
+
+The main entry point that orchestrates the entire application flow:
+
+- Initializes session state and page configuration
+- Renders UI components in proper order
+- Manages chat interface and conversation flow
+- Handles streaming AI responses with real-time display
+- Integrates system instructions with selected prompt strategies
+- Maintains separate conversation histories for each prompt strategy
+
+** 2. Config Module
+
+The ~config/~ module contains all configuration-related functionality, centralizing session state management and AI model settings.
+
+*** init.py
+*Session State Initialization*
+
+Initializes all session state variables with default values at application startup:
+- *API Configuration*: API key storage, available models list, selected model
+- *Model Hyperparameters*: Temperature, top-p, top-k, frequency and presence penalties
+- *UI State Flags*: Toggles for review panels, configuration mode, update flags
+- *Conversation Management*: Message histories, selected prompt content and strategy
+- *Content Storage*: Position description (from URL), resume description (from PDF)
+- *Prompt Strategies*: Six predefined strategy templates with separate message histories
+- *Notification System*: Message placeholder initialization for user feedback
+
+Only initializes variables that don't exist, preserving existing values across reruns.
+
+*** hyper_para.py
+*Model Hyperparameter Controls*
+
+Provides interactive slider components for fine-tuning AI model behavior:
+- *Temperature* (0.0-2.0): Controls response randomness and creativity
+- *Top-p* (0.0-1.0): Nucleus sampling threshold for token selection
+- *Top-k* (1-10): Limits number of highest probability tokens (deprecated for OpenAI)
+- *Frequency Penalty* (-2.0-2.0): Reduces repetition of specific tokens
+- *Presence Penalty* (-2.0-2.0): Reduces repetition of topics/themes
+
+Each function updates the corresponding session state variable.
+
+*** variables.py
+*Prompt Strategy Templates*
+
+Defines six prompt engineering strategies with dynamic content injection:
+
+1. *Standard Prompt*: Basic instruction without guidance or examples
+2. *Zero-Shot Prompt*: Detailed task breakdown with explicit instructions
+3. *One-Shot Prompt*: Single example demonstrating expected output format
+4. *Few-Shot Prompt*: Multiple examples covering different scenarios
+5. *Chain of Thought (CoT)*: Step-by-step reasoning prompts with "Think:" cues
+6. *Delimiter Prompt*: XML tags clearly separating job and resume inputs
+
+Functions:
+- ~init_prompt_content()~: Generates all six strategy templates with current session data
+- ~assemble_prompt_content()~: Refreshes strategies when position/resume content changes
+
+** 3. Components Module
+
+The ~components/~ module handles all user interface rendering and interactions.
+
+*** content.py
+*Content Input Components*
+
+Provides UI components for gathering interview preparation data:
+- *System Instruction Input*: Customizable base prompt for AI assistant behavior
+- *Selected Prompt Display*: Read-only view of complete prompt with strategy
+- *URL Input*: Job posting URL input with automatic LLM-based extraction
+- *PDF Upload*: Resume PDF uploader with PyPDF2 text extraction
+- *Content Review Panels*: Collapsible containers to review extracted content
+
+Key functions:
+- ~input_system_instruction()~: Renders system instruction text area
+- ~input_selected_prompt()~: Displays assembled prompt content
+- ~input_url_content()~: URL input with "View Content" toggle
+- ~resume_input_content()~: PDF uploader with "View Content" toggle
+- ~review_url_extracted_content()~: Triggers URL processing when needed
+
+*** dialogs.py
+*Configuration Dialog Windows*
+
+Modal dialogs for critical configuration operations:
+- *API Key Deletion Dialog*: Confirmation prompt before removing stored API key
+  - Resets all API-related session state
+  - Returns to configuration mode
+  - Shows success notification
+- *Model Configuration Dialog*: Hyperparameter adjustment interface
+  - Displays all five parameter sliders
+  - Updates apply immediately to session state
+
+*** sidebar.py
+*Sidebar Interface*
+
+Renders the application sidebar with two operational modes:
+
+1. *Configuration Mode* (~config_toggle=True~):
+   - API key password input
+   - Automatic validation on change
+   - Transitions to normal mode on success
+
+2. *Normal Mode* (~config_toggle=False~):
+   - Model selection dropdown
+   - API key change/delete buttons
+   - Inference settings button (opens dialog)
+   - Prompt strategy selector with callback
+   - Maintains separate conversation histories per strategy
+
+** 4. Utiles Module
+
+The ~utiles/~ module provides backend utilities for API management, actions, and notifications.
+
+*** actions.py
+*User Interaction Callbacks*
+
+Handles all user-triggered actions and state changes:
+- *Prompt Strategy Management*: Switches strategies while preserving conversation histories
+- *Content Review Toggles*: Shows/hides extracted URL and PDF content panels
+- *URL Processing*: LLM-based job description extraction from web pages
+  - Validates URL format (http/https)
+  - Fetches page content with timeout
+  - Streams LLM extraction to markdown format
+  - Comprehensive error handling (HTTP, connection, timeout errors)
+- *PDF Processing*: Triggers PDF text extraction flag
+
+Key functions:
+- ~change_prompt_strategy()~: Updates prompt content and restores conversation history
+- ~toggle_review_url_content()~: Shows/hides URL content review
+- ~toggel_review_pdf_content()~: Shows/hides PDF content review
+- ~toggle_llm_phase_url()~: Sets URL processing flag
+- ~llm_phase_url()~: Processes URL with LLM extraction
+- ~phase_pdf()~: Sets PDF processing flag
+
+*** check_api.py
+*API Key Validation*
+
+Validates and authenticates OpenAI API keys:
+- *Format Validation*: Ensures key starts with "sk-"
+- *Connection Testing*: Verifies API accessibility
+- *Model Retrieval*: Fetches list of available models
+- *Error Handling*: Graceful handling of authentication, connection, and rate limit errors
+
+Functions:
+- ~check_api_key()~: Callback for API key input field changes
+- ~check_api_key_function()~: Core validation logic with comprehensive error handling
+
+On successful validation:
+- Stores API key in session state
+- Fetches and stores available models
+- Switches to normal mode (config_toggle=False)
+- Displays success notification
+
+*** init_llm_model.py
+*OpenAI Client Management*
+
+Manages OpenAI client initialization and lifecycle:
+- ~initial_llm_model()~: Creates and returns OpenAI client if API key exists
+  - Returns None if no API key is set
+  - Called throughout app when API access needed
+
+*** show_notifications.py
+*User Feedback System*
+
+Centralized notification system for user messages:
+- *Persistent Placeholders*: Message containers that survive reruns
+- *Auto-dismiss*: Notifications clear after specified duration
+- *Multiple Display Modes*: Synchronous and rerun-based display
+
+Functions:
+- ~get_msg_placeholder()~: Retrieves/creates persistent message container
+- ~display_notification()~: Shows pending notifications at app startup
+- ~show_notificaton_message()~: Queues notification and triggers rerun
+- ~show_message_callback()~: Displays notification synchronously without rerun
+
+Used for:
+- API validation success/failure
+- PDF processing status
+- Configuration change confirmations
+- Error messages
+
+* Prompt Engineering Strategies
+
+** Standard Prompt
+Simple instruction combining position and resume information without additional guidance.
+
+** Zero-Shot Prompt
+Provides detailed task breakdown:
+1. Skill-job requirement matching analysis
+2. Topics to focus on for preparation
+3. Most likely technical questions with answers
+
+** One-Shot Prompt
+Includes one example demonstrating the expected output format and content quality.
+
+*Example*: Python role analysis with project experience
+
+** Few-Shot Prompt
+Includes multiple examples covering different scenarios:
+- Python development role
+- Cloud infrastructure/DevOps role
+
+** Chain of Thought (CoT)
+Embeds "Think:" prompts throughout to encourage step-by-step reasoning:
+- Understanding job and resume
+- Finding skill overlaps and gaps
+- Emphasizing strengths
+- Crafting great answers
+
+** Delimiter Prompt
+Uses XML tags to clearly separate different input types:
+#+BEGIN_SRC xml
+<position_description>...</position_description>
+<resume_description>...</resume_description>
+#+END_SRC
+
+* Usage Guide
+
+** Getting Started
+
+1. *Access the Application*
+   - Visit: https://tc-interview-silin.streamlit.app/
+   - Or run locally: ~streamlit run interview.py~
+
+2. *Configure API Key*
+   - Enter your OpenAI API key in the sidebar
+   - The app validates and fetches available models
+   - API key is stored in session (not persisted)
+
+3. *Select AI Model*
+   - Choose from available OpenAI models
+   - Optionally adjust inference settings (temperature, penalties, etc.)
+
+** Preparing for an Interview
+
+1. *Input Job Description*
+   - Paste the job posting URL (must start with http/https)
+   - Click "View URL Content" to review extracted information
+   - The AI automatically extracts and formats the job description
+
+2. *Upload Your Resume*
+   - Upload your resume as a PDF file
+   - Click "View PDF Content" to verify extracted text
+   - Text from all pages is automatically extracted
+
+3. *Customize System Instruction* (Optional)
+   - Modify the base system instruction as needed
+   - Default: "You are a great assistant, I want you help me to prepare an interview."
+
+4. *Select Prompt Strategy*
+   - Choose from six available strategies in the sidebar
+   - Each strategy offers different AI reasoning approaches
+   - Strategy selection updates the displayed prompt 
+
+5. *Start Conversation*
+   - Type your questions in the chat input
+   - Examples:
+     - "Start"
+     - "What technical questions should I expect?"
+     - "How does my experience match this role?"
+   - Receive streaming AI responses
+   - Continue the conversation naturally
+
+** Switching Prompt Strategies
+
+Each prompt strategy maintains its own conversation history. You can:
+- Change the default content of each prompt strategy if you want
+- Switch between strategies to compare approaches
+- Resume previous conversations in each strategy by selecting the prompt strategy
+
+** Adjusting Model Parameters
+
+Click "Inference settings" in the sidebar to adjust:
+
+- *Temperature*: Default 1.0, Range [0.0-2.0]
+  - Lower values → More focused and deterministic responses
+  - Higher values → More random and creative responses
+
+- *Top-p (Nucleus Sampling)*: Default 1.0, Range [0.0-1.0]
+  - Considers tokens whose cumulative probability exceeds p
+  - Lower values → More focused token selection
+
+- *Top-k*: Default 1, Range [1-10]
+  - Limits number of highest probability tokens to consider
+  - Lower values → More focused output
+  - *IMPORTANT: The setting of this value is now deprecated for OpenAI API calls*.
+
+- *Frequency Penalty*: Default 0.0, Range [-2.0-2.0]
+  - Positive values → Reduces token repetition
+  - Negative values → Encourages token repetition
+
+- *Presence Penalty*: Default 0.0, Range [-2.0-2.0]
+  - Positive values → Encourages exploring new topics
+  - Negative values → Allows focusing on existing topics
+
+* Session State Management
+
+The application uses Streamlit's session state to maintain:
+
+- *API Configuration*: API key, available models, selected model
+- *Model Parameters*: All hyperparameter settings
+- *UI State*: Toggle states for review panels, configuration mode
+- *Content*: Job description, resume text
+- *Conversation History*: Separate message histories for each prompt strategy
+- *Notifications*: Pending notification messages and durations
+
+Session state persists across Streamlit reruns but is reset when the page is refreshed.
+
+* Error Handling
+
+The application handles various error scenarios:
+
+** API Key Validation
+- Format validation (must start with "sk-")
+- Authentication errors (incorrect key)
+- Connection errors (network issues)
+- Rate limit errors (quota exceeded)
+
+** URL Processing
+- Protocol validation (must start with http/https)
+- HTTP errors (4xx, 5xx status codes)
+- Connection failures
+- Timeout errors (>5 seconds)
+
+** PDF Processing
+- Empty PDF detection
+- Text extraction failures
+- Invalid file format handling
+
+* Development
+
+** Local Setup
+
+1. *Clone the repository*
+   #+BEGIN_SRC bash
+   git clone <repository-url>
+   cd interview/sizhao-AE.1.4
+   #+END_SRC
+
+2. *Install dependencies*
+   #+BEGIN_SRC bash
+   pip install -r requirements.txt
+   #+END_SRC
+
+3. *Run the application*
+   #+BEGIN_SRC bash
+   streamlit run interview.py
+   #+END_SRC
+
+** Dependencies
+
+Key Python packages (see requirements.txt for complete list):
+- ~streamlit~: Web application framework
+- ~openai~: OpenAI API client
+- ~PyPDF2~: PDF text extraction
+- ~requests~: HTTP requests for URL fetching
+- ~pandas~: Data structure for prompt strategies
+
+** Code Quality
+
+- Linting configured with ~ruff.toml~
+- Comprehensive docstrings for all functions
+- Modular architecture with clear separation of concerns
+
+* Future Enhancements
+
+Potential improvements for future versions:
+
+- [ ] User authentication and profile management?
+- [ ] Support for multiple resume versions
+- [ ] Interview question bank with difficulty levels
+- [ ] Mock interview simulation mode
+- [ ] Export functionality for preparation plans
+- [ ] Support for other LLM providers (Anthropic, Google, etc.)
+- [ ] Advanced PDF handling (OCR for scanned documents)
+- [ ] Analytics on interview preparation progress
+
+* Contributing
+
+Contributions are welcome! Please follow these guidelines:
+
+1. Fork the repository
+2. Create a feature branch
+3. Add comprehensive comments to new functions
+4. Test thoroughly with different prompt strategies
+5. Update documentation as needed
+6. Submit a pull request
+
+* License
+
+Please refer to the repository license file for licensing information.
+
+* Contact
+
+- *Author*: Si Zhao
+- *Project*: Interview Preparation Assistant (AE.1.4)
+- *Year*: 2025
+
+* Acknowledgments
+
+- OpenAI for providing the GPT API
+- Streamlit team for the excellent web framework
+- PyPDF2 contributors for PDF processing capabilities
+
+---
+
+*Last Updated*: December 2025
+#+END_SRC
