@@ -147,7 +147,7 @@ def llm_phase_url():
                 st.error(f"❌ An unexpected error occurred: {e}")
 
 
-def phase_pdf():
+def parse_pdf():
     """
     Set flag to trigger PDF processing.
 

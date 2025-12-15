@@ -16,7 +16,7 @@ from utiles.actions import (
     toggle_review_url_content,
     toggle_llm_phase_url,
     llm_phase_url,
-    phase_pdf,
+    parse_pdf,
 )
 
 
@@ -102,7 +102,7 @@ def resume_input_content():
         upload_pdf = st.file_uploader(
             "You can load your resume as PDF",
             label_visibility="collapsed",
-            on_change=phase_pdf,
+            on_change=parse_pdf,
             type="pdf",
         )
 

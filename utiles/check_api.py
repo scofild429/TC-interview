@@ -62,7 +62,14 @@ def check_api_key_function(api_key):
                 response = client.models.list()
                 available_model = []
                 for item in response:
-                    available_model.append(item.id)
+                    if (
+                        not item.id.endswith("instruct")  # remove legacy model
+                        and "embedding" not in item.id.lower()  # remove embedding model
+                        and "dall" not in item.id.lower()  # remove image generation model
+                        and "tts" not in item.id.lower()  # remove text to speech model
+                        and "whisper" not in item.id.lower()  # remove speech to text model
+                    ):  # So sorry, this is no chat model specified in the model name(id)
+                        available_model.append(item.id)
 
                 #                st.session_state.api_key = api_key
                 st.session_state.available_model = available_model
