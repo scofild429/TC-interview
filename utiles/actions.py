@@ -7,14 +7,15 @@ This module contains callback functions that handle various user actions such as
 - Processing URLs to extract job descriptions
 - Handling PDF resume uploads
 """
+from utiles.prompts import typst_content, tone_setting
 
 import streamlit as st
 from io import StringIO
-
-from .init_llm_model import initial_llm_model
+from .llm_model import initial_llm_model
 import requests
 from requests.exceptions import Timeout, ConnectionError, HTTPError, RequestException
 from config.variables import assemble_prompt_content
+
 
 
 def change_prompt_strategy():
@@ -147,6 +148,35 @@ def llm_phase_url():
                 st.error(f"❌ An unexpected error occurred: {e}")
 
 
+def llm_parse_pdf(content):
+    client = initial_llm_model()
+    if client is None:
+        return None
+    try:
+        response = client.chat.completions.create(
+            model=st.session_state.selected_model,
+            messages=[
+                {
+                    "role": "system", 
+                    "content": (
+                        "You are a PDF-to-Markdown conversion assistant. "
+                        "Reformat the raw text into clean, valid Markdown. "
+                        "Maintain headers, lists, and tables. "
+                        "Do not include any introductory text or backtick fences—return ONLY the markdown."
+                    )
+                },
+                {"role": "user", "content": content},
+            ],
+         )
+        
+        # Correct way to access the string content
+        return response.choices[0].message.content
+
+    except Exception as e:
+        print(f"Error calling LLM: {e}")
+        return None                
+                
+
 def parse_pdf():
     """
     Set flag to trigger PDF processing.
@@ -155,3 +185,57 @@ def parse_pdf():
     signaling that the PDF content should be extracted.
     """
     st.session_state.toggle_input_pdf = True
+
+
+
+def Generate_Application_PDF():
+    client = initial_llm_model()
+    
+    # 1. The Prompting Phase
+    prompt = f"""
+    You are a professional career coach. Write a highly tailored, persuasive job application letter.
+    
+    USER RESUME CONTENT:
+    {st.session_state.resume_description}
+    
+    JOB DESCRIPTION:
+    {st.session_state.position_description}
+
+    HELPFUL CONVERSATION:
+    {st.session_state.messages}
+    
+    INSTRUCTIONS:
+    - Use a professional formal letter typst format as I provided ```{typst_content}´´´.
+    - Match the user's skills specifically to the job requirements as I provided ```{tone_setting}´´´.
+    - Return ONLY the content of the rewrite typst format.
+    """
+    
+    with st.spinner("Writing application..."):
+        try:
+            response = client.chat.completions.create(
+                model=st.session_state.selected_model,
+                messages=[{"role": "user", "content": prompt}],
+            )
+            application_text = response.choices[0].message.content
+
+            # 2. Display and Download
+            st.success("Application Drafted Successfully!")
+            
+            # Show a preview in the app
+            with st.expander("Preview Application"):
+                st.text(application_text)
+
+            # Streamlit handles the .txt generation internally when you pass a string
+            st.download_button(
+                label="Download as Text File",
+                data=application_text,
+                file_name="Job_Application.txt",
+                mime="text/plain"
+            )
+
+        except Exception as e:
+            st.error(f"An error occurred: {e}")
+
+
+
+    

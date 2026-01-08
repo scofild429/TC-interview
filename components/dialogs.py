@@ -62,3 +62,4 @@ def open_model_config_dialog():
     set_top_p()
     set_frequency_penalty()
     set_presence_penalty()
+

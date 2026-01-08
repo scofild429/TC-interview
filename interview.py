@@ -19,8 +19,7 @@ from components.content import (
     input_selected_prompt,
     review_url_extracted_content,
 )
-from utiles.init_llm_model import initial_llm_model
-from openai.types.chat import ChatCompletionMessageParam
+from utiles.llm_model import initial_llm_model
 
 
 # Initialize session state variables before any UI rendering
@@ -45,7 +44,7 @@ st.markdown(
     unsafe_allow_html=True,
 )
 st.header("You are preparing now an interview!")
-
+  
 
 # Check and display any pending notifications at the top of the page
 display_notification()
@@ -81,7 +80,7 @@ if prompt := st.chat_input("Input or Enter your start... "):
             st.markdown(prompt)
 
         # Prepare messages for API call: system instruction + selected prompt + conversation history
-        messages: list[ChatCompletionMessageParam] = [
+        messages = [
             {
                 "role": "system",
                 "content": f"{st.session_state.system_instruction}{st.session_state.selected_prompt_content}",

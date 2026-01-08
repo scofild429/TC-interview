@@ -11,7 +11,7 @@ This module handles:
 import streamlit as st
 from openai import AuthenticationError, APIConnectionError, RateLimitError
 from .show_notifications import show_message_callback
-from .init_llm_model import initial_llm_model
+from .llm_model import initial_llm_model
 
 
 def check_api_key():

@@ -16,7 +16,7 @@ from utiles.actions import (
     toggle_review_url_content,
     toggle_llm_phase_url,
     llm_phase_url,
-    parse_pdf,
+    parse_pdf, llm_parse_pdf,
 )
 
 
@@ -114,7 +114,10 @@ def resume_input_content():
                 pdf_content = ""
                 for page in pdf_reader.pages:
                     pdf_content += page.extract_text() + "\n"
-                st.session_state.resume_description = pdf_content
+
+                polisched_pdf_content = llm_parse_pdf(pdf_content)
+                    
+                st.session_state.resume_description = polisched_pdf_content
                 show_notificaton_message("PDF is successful phased.", 2)
             else:
                 show_notificaton_message("You PDF has no contxt", 2)

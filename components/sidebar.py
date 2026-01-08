@@ -12,7 +12,7 @@ This module provides the sidebar UI containing:
 import streamlit as st
 from utiles.check_api import check_api_key, check_api_key_function
 from components.dialogs import open_model_config_dialog, open_delete_api_dialog
-from utiles.actions import change_prompt_strategy
+from utiles.actions import change_prompt_strategy, Generate_Application_PDF
 
 
 def initial_sidebar():
@@ -73,3 +73,7 @@ def initial_sidebar():
                 key="selected_prompt_strategy",
                 on_change=change_prompt_strategy,
             )
+
+            if st.button("Generate Application", type="primary"):
+                if st.session_state.resume_description != "" and st.session_state.position_description != "":
+                    Generate_Application_PDF()
