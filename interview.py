@@ -73,7 +73,7 @@ if prompt := st.chat_input("Input or Enter your start... "):
     # Add user message to chat history
 
     if st.session_state.api_key is None or st.session_state.selected_model is None:
-        st.error("Please inupt API and set model at first.")
+        st.error("Please input API and set model at first.")
     else:
         st.session_state.messages.append({"role": "user", "content": prompt})
         with st.chat_message("user"):

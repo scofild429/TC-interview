@@ -42,10 +42,10 @@ def initial_sidebar():
             )
         else:
             st.header("Model Configuration")
-            avaliable_model = st.session_state.available_model
+            available_model = st.session_state.available_model
             selected_model = st.selectbox(
                 "Choose an available AI model",
-                avaliable_model,
+                available_model,
             )
             st.session_state.selected_model = selected_model
 

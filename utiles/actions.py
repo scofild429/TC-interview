@@ -68,7 +68,7 @@ def toggle_llm_phase_url():
     signaling that the URL should be processed by the LLM.
     """
     if st.session_state.api_key is None or st.session_state.selected_model is None:
-        st.error("Please inupt API and set model at first.")
+        st.error("Please input API and set model at first.")
         return
 
     st.session_state.action_llm_phase_url = True
@@ -90,7 +90,7 @@ def llm_phase_url():
     url_input = st.session_state.input_url
     if url_input:
         if not url_input.startswith("http"):
-            st.error("Your URL should starts with 'http' or 'https'")
+            st.error("Your URL should start with 'http' or 'https'")
         else:
             try:
                 with st.spinner(f"Querying {url_input}"):
@@ -106,7 +106,7 @@ def llm_phase_url():
                         messages=[
                             {
                                 "role": "system",
-                                "content": "You are a very helpful assistant, please extract the complete position informatoin, without any imgaes included, and then convert it into markdown format, please be careful and think hard, you have to return valid markdown format.",
+                                "content": "You are a very helpful assistant, please extract the complete position information, without any images included, and then convert it into markdown format, please be careful and think hard, you have to return valid markdown format.",
                             },
                             {"role": "user", "content": response.text},
                         ],
@@ -173,8 +173,8 @@ def llm_parse_pdf(content):
         return response.choices[0].message.content
 
     except Exception as e:
-        print(f"Error calling LLM: {e}")
-        return None                
+        st.error(f"Error calling LLM: {e}")
+        return ""                
                 
 
 def parse_pdf():

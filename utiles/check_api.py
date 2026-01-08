@@ -49,7 +49,7 @@ def check_api_key_function(api_key):
     - General exceptions: Other unexpected errors
     """
     if not api_key.startswith("sk-"):
-        st.warning("Invilid: ONLY OPENAI API Key allowed!")
+        st.warning("Invalid: ONLY OPENAI API Key allowed!")
     else:
         st.session_state.api_key = api_key
         try:

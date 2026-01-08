@@ -110,15 +110,18 @@ def resume_input_content():
         if st.session_state.toggle_input_pdf:
             st.session_state.toggle_input_pdf = False
             if upload_pdf is not None:
-                pdf_reader = PyPDF2.PdfReader(upload_pdf)
-                pdf_content = ""
-                for page in pdf_reader.pages:
-                    pdf_content += page.extract_text() + "\n"
+                try:
+                    pdf_reader = PyPDF2.PdfReader(upload_pdf)
+                    pdf_content = ""
+                    for page in pdf_reader.pages:
+                        pdf_content += page.extract_text() + "\n"
 
-                polisched_pdf_content = llm_parse_pdf(pdf_content)
-                    
-                st.session_state.resume_description = polisched_pdf_content
-                show_notificaton_message("PDF is successful phased.", 2)
+                    polisched_pdf_content = llm_parse_pdf(pdf_content)
+                        
+                    st.session_state.resume_description = polisched_pdf_content
+                    show_notificaton_message("PDF is successful phased.", 2)
+                except Exception as e:
+                    st.error(f"Error reading PDF: {str(e)}")
             else:
                 show_notificaton_message("You PDF has no contxt", 2)
     with col2:
